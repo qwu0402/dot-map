@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ドット絵マップやよ！</title>
@@ -10,7 +9,11 @@
   <style>
     #map { height: 100vh; width: 100vw; margin: 0; }
     body { margin: 0; padding: 0; }
-    .pixel-art { image-rendering: pixelated; }
+    /* ドット絵がボヤけないようにくっきり表示する設定やよ！ */
+    .pixel-art {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
   </style>
 </head>
 <body>
@@ -18,37 +21,44 @@
 <div id="map"></div>
 
 <script>
-  // 地図の表示（北見駅の近くを中心にしておくやよ！）
+  // 地図の初期化（北見駅周辺）
   const map = L.map('map').setView([43.8041, 143.8964], 16);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap'
   }).addTo(map);
 
-  // 分かりやすいサンプルアイコン画像（赤いピンじゃなくてドット絵風アイコン）やよ！
+  // さっきアップロードした chara.png を指定するやよ！
   const pixelIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34]
+    iconUrl: 'chara.png', // アップロードした画像ファイル名
+    iconSize: [48, 48],   // 表示する大きさ（好みに合わせて変更してね）
+    iconAnchor: [24, 24], // 画像の中心を現在地に合わせる設定
+    className: 'pixel-art'
   });
 
-  // テスト用に固定位置にドット絵マーカーを置くやよ！
-  const testMarker = L.marker([43.8041, 143.8964], { icon: pixelIcon }).addTo(map);
-  testMarker.bindPopup("ここにドット絵がいるやよ！").openPopup();
+  let userMarker = null;
 
-  // GPS追跡も動かすやよ！
+  // GPSで現在地を取得・追跡するやよ！
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition((position) => {
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
-      
-      // 現在地にもマーカーを置くやよ！
-      L.marker([lat, lng], { icon: pixelIcon }).addTo(map);
-      map.setView([lat, lng], 16);
+
+      if (!userMarker) {
+        // 初回：ドット絵キャラを現在地に配置！
+        userMarker = L.marker([lat, lng], { icon: pixelIcon }).addTo(map);
+        map.setView([lat, lng], 17);
+      } else {
+        // 2回目以降：移動に合わせてドット絵も動くやよ
+        userMarker.setLatLng([lat, lng]);
+      }
     }, (error) => {
-      console.log('GPSエラーやよ');
-    }, { enableHighAccuracy: true });
+      alert('GPSの位置情報が取れんかったやよ…スマホの設定で位置情報を許可してね！');
+    }, {
+      enableHighAccuracy: true
+    });
+  } else {
+    alert('このブラウザはGPSに対応してないやよ〜！');
   }
 </script>
 </body>
