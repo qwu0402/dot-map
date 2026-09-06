@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ドット絵マップやよ！</title>
@@ -9,10 +10,7 @@
   <style>
     #map { height: 100vh; width: 100vw; margin: 0; }
     body { margin: 0; padding: 0; }
-    /* ドット絵がボヤけないようにくっきり表示する設定やよ！ */
-    .pixel-art {
-      image-rendering: pixelated;
-    }
+    .pixel-art { image-rendering: pixelated; }
   </style>
 </head>
 <body>
@@ -20,48 +18,37 @@
 <div id="map"></div>
 
 <script>
-  // 地図の初期化（最初は東京駅あたりにしておくやよ）
-  const map = L.map('map').setView([35.681236, 139.767125], 16);
+  // 地図の表示（北見駅の近くを中心にしておくやよ！）
+  const map = L.map('map').setView([43.8041, 143.8964], 16);
 
-  // 地図の見た目をセット（OpenStreetMapを使用）
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap'
   }).addTo(map);
 
-  // 16x16のドット絵キャラ（笹木っぽいカラーのドット絵アイコンデータやよ！）
-  const pixelCharacterData = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAGVJREFUAO1S0Q0AIAiyM3aPbuE43cAatAat434c4m3OACkISfvhC3ifRER23P2S23sAnByvAAtACkBWxANwByQAC0AKQFaEA3AHJAAfARm3CkDGA6fX4/sAInIC8P/jC/yqO3oAenA/AW41SksAAAAASUVORK5CYII=';
-
-  // ドット絵のアイコン設定やよ
+  // 分かりやすいサンプルアイコン画像（赤いピンじゃなくてドット絵風アイコン）やよ！
   const pixelIcon = L.icon({
-    iconUrl: pixelCharacterData,
-    iconSize: [48, 48], // 大きめに表示してレトロ感を出すやよ
-    iconAnchor: [24, 24],
-    className: 'pixel-art'
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34]
   });
 
-  let userMarker = null;
+  // テスト用に固定位置にドット絵マーカーを置くやよ！
+  const testMarker = L.marker([43.8041, 143.8964], { icon: pixelIcon }).addTo(map);
+  testMarker.bindPopup("ここにドット絵がいるやよ！").openPopup();
 
-  // GPSで現在地を追跡する関数やよ！
+  // GPS追跡も動かすやよ！
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition((position) => {
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
-
-      // 初回は位置をマーカー登録＆カメラを現在地に移動
-      if (!userMarker) {
-        userMarker = L.marker([lat, lng], { icon: pixelIcon }).addTo(map);
-        map.setView([lat, lng], 17);
-      } else {
-        // 2回目以降はぬるっと位置を更新するやよ
-        userMarker.setLatLng([lat, lng]);
-      }
+      
+      // 現在地にもマーカーを置くやよ！
+      L.marker([lat, lng], { icon: pixelIcon }).addTo(map);
+      map.setView([lat, lng], 16);
     }, (error) => {
-      alert('GPSの位置情報が取れんかったやよ…位置情報を許可してね！');
-    }, {
-      enableHighAccuracy: true
-    });
-  } else {
-    alert('このブラウザはGPSに対応してないやよ〜！');
+      console.log('GPSエラーやよ');
+    }, { enableHighAccuracy: true });
   }
 </script>
 </body>
