@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ドット絵マップやよ！</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    #map { height: 100vh; width: 100vw; margin: 0; }
+    body { margin: 0; padding: 0; }
+    /* ドット絵がボヤけないようにくっきり表示する設定やよ！ */
+    .pixel-art {
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+  // 地図の初期化（最初は東京駅あたりにしておくやよ）
+  const map = L.map('map').setView([35.681236, 139.767125], 16);
+
+  // 地図の見た目をセット（OpenStreetMapを使用）
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  // 16x16のドット絵キャラ（笹木っぽいカラーのドット絵アイコンデータやよ！）
+  const pixelCharacterData = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAGVJREFUAO1S0Q0AIAiyM3aPbuE43cAatAat434c4m3OACkISfvhC3ifRER23P2S23sAnByvAAtACkBWxANwByQAC0AKQFaEA3AHJAAfARm3CkDGA6fX4/sAInIC8P/jC/yqO3oAenA/AW41SksAAAAASUVORK5CYII=';
+
+  // ドット絵のアイコン設定やよ
+  const pixelIcon = L.icon({
+    iconUrl: pixelCharacterData,
+    iconSize: [48, 48], // 大きめに表示してレトロ感を出すやよ
+    iconAnchor: [24, 24],
+    className: 'pixel-art'
+  });
+
+  let userMarker = null;
+
+  // GPSで現在地を追跡する関数やよ！
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition((position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      // 初回は位置をマーカー登録＆カメラを現在地に移動
+      if (!userMarker) {
+        userMarker = L.marker([lat, lng], { icon: pixelIcon }).addTo(map);
+        map.setView([lat, lng], 17);
+      } else {
+        // 2回目以降はぬるっと位置を更新するやよ
+        userMarker.setLatLng([lat, lng]);
+      }
+    }, (error) => {
+      alert('GPSの位置情報が取れんかったやよ…位置情報を許可してね！');
+    }, {
+      enableHighAccuracy: true
+    });
+  } else {
+    alert('このブラウザはGPSに対応してないやよ〜！');
+  }
+</script>
+</body>
+</html>
